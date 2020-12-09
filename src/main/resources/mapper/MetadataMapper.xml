@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.MetadataMapper">
+  <resultMap id="BaseResultMap" type="com.example.demo.model.Metadata">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="label" jdbcType="VARCHAR" property="label" />
+    <result column="right_value" jdbcType="BIGINT" property="rightValue" />
+    <result column="left_value" jdbcType="BIGINT" property="leftValue" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="retrieve" jdbcType="VARCHAR" property="retrieve" />
+    <result column="is_leaf" jdbcType="TINYINT" property="isLeaf" />
+    <result column="del_flag" jdbcType="TINYINT" property="delFlag" />
+  </resultMap>
+  <sql id="Base_Column_List">
+        id, `code`, label, description, retrieve, `left_value`, `right_value`, remark, is_leaf
+    </sql>
+  <insert id="insertOne">
+    INSERT INTO sys_metadata sm (<include refid="Base_Column_List" />)
+    VALUES (#{metadataDTO.id},#{metadataDTO.code}, #{metadataDTO.label}, #{metadataDTO.description}, #{metadataDTO.retrieve}
+    ,#{metadataDTO.leftValue},#{metadataDTO.right},#{metadataDTO.remark},#{metadataDTO.isLeaf})
+  </insert>
+
+  <update id="updateRightByLeft">
+    UPDATE sys_metadata
+    SET `right_value` = `right_value` + 2
+    WHERE `right_value` > #{leftValue}
+  </update>
+
+  <update id="updateLeftByLeft">
+    UPDATE sys_metadata sm
+    SET `left_value` = `left_value` + 2
+    WHERE `left_value` > #{leftValue}
+    AND sm.del_flag = 0
+  </update>
+
+  <update id="updateLeftByRight">
+    UPDATE sys_metadata
+    SET `left_value` = `left_value` + 2
+    WHERE `left_value` > #{rightValue}
+    AND sm.del_flag = 0
+  </update>
+
+  <update id="updateRightByRight">
+    UPDATE sys_metadata
+    SET `right_value` = `right_value` + 2
+    WHERE `right_value` >= #{rightValue}
+    AND sm.del_flag = 0
+  </update>
+
+  <select id="selectByLabelAndCode" resultType="com.example.demo.model.Metadata">
+    SELECT
+    <include refid="Base_Column_List"></include>
+    FROM sys_metadata sm
+    <where>
+      <if test="label != null and label != ''">
+        AND sm.label = #{label}
+      </if>
+        AND sm.code = #{code}
+      AND sm.del_flag = 0
+    </where>
+  </select>
+
+  <insert id="insertBatch" parameterType="com.example.demo.model.MetadataDTO">
+    INSERT INTO sys_metadata sm <include refid="Base_Column_List" />
+    VALUES
+    <foreach collection="metadataDTOList" index="index" item="item"  separator="," >
+      (#{item.id}, #{item.value}, #{item.label}, #{item.type}, #{item.description}, #{item.isLeaf})
+    </foreach>
+  </insert>
+
+
+  <select id="queryPage" resultType="com.example.demo.model.MetadataVO">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM sys_metadata sm
+    <where>
+      <if test="metadataQuery.id != null and metadataQuery.id != ''">
+        AND sm.id = #{metadataQuery.id}
+      </if>
+      <if test="metadataQuery.label != null and metadataQuery.label != ''">
+        AND sm.label LIKE concat(#{metadataQuery.label}, '%')
+      </if>
+      <if test="metadataQuery.code != null and metadataQuery.code != ''">
+        AND sm.code = #{metadataQuery.code}
+      </if>
+      <if test="metadataQuery.retrieve != null and metadataQuery.retrieve != ''">
+        AND sm.retrieve LIKE concat(#{metadataQuery.retrieve}, '%')
+      </if>
+      AND sm.del_flag = 0
+    </where>
+    AND sm.label != 'SYS'
+  </select>
+
+
+  <update id="updateLeftWhileDelete">
+        UPDATE sys_metadata sm
+        SET sm.left_value = sm.left_value - 2
+        WHERE sm.left_value > #{rightValue}
+        AND sm.del_flag = 0
+    </update>
+
+  <update id="updateRightWhileDelete">
+        UPDATE sys_metadata sm
+        SET sm.`right_value` = sm.`right_value` - 2
+        WHERE sm.`right_value` > #{rightValue}
+        AND sm.del_flag = 0
+    </update>
+
+  <select id="getByLabel" resultType="com.example.demo.model.Metadata">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM sys_metadata sm
+    WHERE
+    sm.label = #{label}
+    AND
+    sm.del_flag = 0
+  </select>
+
+  <select id="getRoot" resultType="com.example.demo.model.Metadata">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM sys_metadata sm
+    WHERE sm.label = #{label}
+  </select>
+
+  <select id="selectByLeft" resultType="com.example.demo.model.MetadataVO">
+        SELECT sm.id, sm.`code`, sm.label, sm.description, sm.retrieve, sm.is_leaf, sm.`right_value`, sm.`left_value`, sm.remark
+        FROM sys_metadata sm
+        WHERE sm.del_flag = 0
+        AND sm.`left_value`
+        BETWEEN #{metadata.leftValue} AND #{metadata.rightValue}
+        ORDER BY sm.`left_value`
+    </select>
+
+  <select id="selectAllChild" resultType="com.example.demo.model.MetadataVO">
+        SELECT sm.id, sm.`code`, sm.label, sm.description, sm.retrieve, sm.is_leaf,sm.`right_value`, sm.`left_value`, sm.remark
+        FROM sys_metadata sm
+        WHERE sm.`right_value` = sm.`left_value` + 1
+        AND sm.`left_value` > #{leftValue}
+        AND sm.del_flag = 0
+    </select>
+
+  <select id="queryDepth" resultType="com.example.demo.model.MetadataPartBO">
+        SELECT
+	    node.`id`, ( COUNT( parent.`id` ) - 1 ) AS depth
+        FROM
+	    sys_metadata AS node,
+	    sys_metadata AS parent
+        WHERE
+        sm.del_flag = 0
+	    AND node.`left_value` BETWEEN parent.`left_value` AND parent.`right_value`
+        GROUP BY
+	    node.`id`
+        ORDER BY
+	    node.`left_value`
+    </select>
+  <select id="selectAllWithoutChild" resultType="com.example.demo.model.MetadataVO">
+     SELECT sm.id, sm.`code`, sm.label, sm.description, sm.retrieve, sm.right_value, sm.left_value, sm.remark
+        FROM sys_metadata sm
+        WHERE sm.right_value != sm.left_value + 1
+        AND sm.left_value > #{leftValue}
+        AND sm.del_flag = 0
+  </select>
+
+</mapper>
