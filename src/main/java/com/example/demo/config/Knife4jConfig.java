@@ -1,15 +1,12 @@
 package com.example.demo.config;
 
 import com.github.xiaoymin.knife4j.spring.extension.OpenApiExtensionResolver;
-import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -18,7 +15,6 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import javax.annotation.Resource;
 
@@ -27,12 +23,7 @@ import javax.annotation.Resource;
  * @description
  * @date 2020/12/7 18:56
  */
-//@ConditionalOnProperty(
-//        value = {"spring.sk.web.knife4j.enable"},
-//        havingValue = "true"
-//)
 @EnableOpenApi
-//@EnableSwagger2
 @Configuration
 @EnableConfigurationProperties({SwaggerProperties.class})
 public class Knife4jConfig {
@@ -66,7 +57,7 @@ public class Knife4jConfig {
                 .build()
                 .enable(swaggerProperties.isEnable())
                 .extensions(openApiExtensionResolver.buildSettingExtensions());
-        log.info("【SK-Web-Swagger配置】启用,请访问:http://ip:port/doc.html");
+        log.info("【Swagger配置】启用,请访问:http://ip:port/doc.html");
         return docket;
     }
 
@@ -79,7 +70,9 @@ public class Knife4jConfig {
                 .title(swaggerProperties.getTitle())
                 .description(swaggerProperties.getDescription())
                 .termsOfServiceUrl(swaggerProperties.getUrl())
-                .contact(new Contact(swaggerProperties.getContactName(), swaggerProperties.getContactUrl(), swaggerProperties.getContactEmail()))
+                .contact(new Contact(swaggerProperties.getContactName(),
+                        swaggerProperties.getContactUrl(),
+                        swaggerProperties.getContactEmail()))
                 .version(swaggerProperties.getVersion())
                 .build();
     }

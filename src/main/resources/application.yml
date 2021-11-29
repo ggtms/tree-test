@@ -12,20 +12,8 @@ spring:
     time-zone: GMT+8
     serialization:
       write-dates-as-timestamps: false
-  sk:
-    web:
-      knife4j:
-        enable: true
-        setting:
-          # 是否开启调试功能  true开启  false关闭
-          enableDebug: true
-        description: 移动之家
-        version: 1.0.0-SNAPSHOT
-        title: 移动
-        contact-name: mobile nursing
-        group-name: test
 
-
+# 必须按此格式配置
 knife4j:
   enable: true
   setting:

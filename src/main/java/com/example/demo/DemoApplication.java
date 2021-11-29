@@ -14,7 +14,6 @@ import java.util.Arrays;
  */
 @Slf4j
 @MapperScan("com.example.demo.mapper")
-@EnableSwagger2
 @SpringBootApplication
 public class DemoApplication {
 
