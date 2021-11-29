@@ -1,7 +1,5 @@
-#server:
-#  port: 8081
-#  servlet:
-#    context-path: /
+server:
+  port: 8080
 
 spring:
   datasource:
@@ -14,6 +12,30 @@ spring:
     time-zone: GMT+8
     serialization:
       write-dates-as-timestamps: false
+  sk:
+    web:
+      knife4j:
+        enable: true
+        setting:
+          # 是否开启调试功能  true开启  false关闭
+          enableDebug: true
+        description: 移动之家
+        version: 1.0.0-SNAPSHOT
+        title: 移动
+        contact-name: mobile nursing
+        group-name: test
+
+
+knife4j:
+  enable: true
+  setting:
+    # 是否开启调试功能  true开启  false关闭
+    enableDebug: true
+  description: 移动之家
+  version: 1.0.0-SNAPSHOT
+  title: 移动
+  contact-name: mobile nursing
+  group-name: test
 
 mybatis-plus:
   configuration:
@@ -22,9 +44,6 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath*:mapper/**/*Mapper.xml
   global-config:
-    # �߼�ɾ������
     db-config:
-      # ɾ��ǰ
       logic-not-delete-value: 0
-      # ɾ����
       logic-delete-value: 1
